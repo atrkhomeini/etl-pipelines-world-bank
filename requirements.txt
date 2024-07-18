@@ -1,0 +1,14 @@
+os_sys
+simplejson
+beautifulsoup4
+pysqlite3
+sqlalchemy
+requests
+pandas
+numpy
+pycountry
+#collections==3.3
+chardet
+matplotlib
+scikit-learn
+kaggle
