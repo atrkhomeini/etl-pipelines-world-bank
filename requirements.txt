@@ -1,6 +1,7 @@
 os_sys
 simplejson
 beautifulsoup4
+bs4
 pysqlite3
 sqlalchemy
 requests
@@ -12,3 +13,5 @@ chardet
 matplotlib
 scikit-learn
 kaggle
+lxml
+html5lib
