@@ -115,3 +115,8 @@ for record in soup.find_all('record'):
 # Extract data from SQL Databases
 #---------------------------------
 
+#Connect to databases
+connect = sqlite3.connect('../artifacts/raw/population_data.db')
+#run a query
+pd.read_sql('SELECT * FROM population_data', connect)
+pd.read_sql('SELECT "Country_Name", "Country_Code", "1960" FROM population_data', connect)
