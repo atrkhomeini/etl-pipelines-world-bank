@@ -171,3 +171,74 @@ df_projects[['totalamt', 'lendprojectcost']].head()
 
 df_projects['totalamt'] = pd.to_numeric(df_projects['totalamt'].str.replace(',',""))
 
+#-------------------------------------
+# Parsing Dates
+#-------------------------------------
+df_projects.head(15)[['boardapprovaldate', 'board_approval_month', 'closingdate']]
+
+df_projects['boardapprovaldate'] = pd.to_datetime(df_projects['boardapprovaldate'])
+df_projects['closingdate'] = pd.to_datetime(df_projects['closingdate'])
+
+
+df_projects['approvalyear'] = df_projects['boardapprovaldate'].dt.year
+df_projects['approvalday'] = df_projects['boardapprovaldate'].dt.day
+df_projects['approvalweekday'] = df_projects['boardapprovaldate'].dt.weekday
+df_projects['closingyear'] = df_projects['closingdate'].dt.year
+df_projects['closingday'] = df_projects['closingdate'].dt.day
+df_projects['closingweekday'] = df_projects['closingdate'].dt.weekday
+
+#-------------------------------------
+# Encoding Data
+#-------------------------------------
+
+from encodings.aliases import aliases
+
+alias_values = set(aliases.values())
+
+for encoding in set(aliases.values()):
+    try:
+        df_mystery=pd.read_csv('../artifacts/raw/mystery.csv', encoding=encoding)
+        print('successful', encoding)
+    except:
+        pass
+
+import chardet
+with open ('../artifacts/raw/mystery.csv', 'rb') as file:
+    print(chardet.detect(file.read()))
+
+
+#-------------------------------------
+# Imputing Data
+#-------------------------------------
+
+df_gdp = pd.read_csv('../artifacts/raw/gdp_data.csv', skiprows=4)
+df_gdp = df_gdp.drop(['Unnamed: 62'], axis=1)
+
+df_gdp.isnull().sum()
+
+#Plot the missing values in the df_gdp data frame
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+# put the data set into long form instead of wide
+df_melt = pd.melt(df_gdp, id_vars=['Country Name', 'Country Code', 'Indicator Name', 'Indicator Code'], var_name='year', value_name='GDP')
+
+# convert year to a date time
+df_melt['year'] = pd.to_datetime(df_melt['year'])
+
+def plot_results(column_name):
+    # plot the results for Afghanistan, Albania, and Honduras
+    fig, ax = plt.subplots(figsize=(8,6))
+
+    df_melt[(df_melt['Country Name'] == 'Indonesia') | 
+            (df_melt['Country Name'] == 'South Korea') | 
+            (df_melt['Country Name'] == 'Japan')].groupby('Country Name').plot('year', column_name, legend=True, ax=ax)
+    ax.legend(labels=['Indonesia', 'South Korea', 'Japan'])
+    
+plot_results('GDP')
+
+#-------------------------------------
+# Dupplicate Data
+#-------------------------------------
+
+
