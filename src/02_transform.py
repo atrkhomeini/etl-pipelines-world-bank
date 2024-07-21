@@ -139,3 +139,35 @@ df_projects[df_projects['Country Code'] == '']
 # Data Types
 #-------------------------------------
 
+df_indic.dtypes
+# Calculate the population sum by year for Canada,
+#       the United States, and Mexico.
+
+# the keepcol variable makes a list of the column names to keep. You can use this if you'd like
+keepcol = ['Country Name']
+for i in range(1960, 2018, 1):
+    keepcol.append(str(i))
+
+# In the df_nafta variable, store a data frame that only contains the rows for 
+#      Canada, United States, and Mexico.
+df_nafta = df_indic[(df_indic['Country Name'] == 'Canada') | 
+             (df_indic['Country Name'] == 'United States') | 
+            (df_indic['Country Name'] == 'Mexico')].iloc[:,]
+
+
+# Calculate the sum of the values in each column in order to find the total population by year.
+# You can use the keepcol variable if you want to control which columns get outputted
+df_nafta.sum(axis=0)[keepcol]
+
+df_projects[['totalamt', 'lendprojectcost']].head()
+
+# Convert the totalamt column from a string to a float and save the results back into the totalamt column
+
+# Step 1: Remove the commas from the 'totalamt' column
+# HINT: https://pandas.pydata.org/pandas-docs/version/0.22/generated/pandas.Series.str.replace.html
+
+# Step 2: Convert the 'totalamt' column from an object data type (ie string) to an integer data type.
+# HINT: https://pandas.pydata.org/pandas-docs/version/0.23/generated/pandas.to_numeric.html
+
+df_projects['totalamt'] = pd.to_numeric(df_projects['totalamt'].str.replace(',',""))
+
