@@ -37,7 +37,7 @@ else:
     print("The file already exists.")
 
 # import the projects_data.csv file
-df = pd.read_csv('../artifacts/raw/projects_data.csv')
+df = pd.read_csv('../artifacts/raw/projects_data.csv', dtype=str)
 # check number of null
 print(df.isnull().sum())
 # output shape of the dataframe
