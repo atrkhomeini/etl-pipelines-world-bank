@@ -1,4 +1,9 @@
 import pandas as pd
+import numpy as np
+from encodings.aliases import aliases
+import matplotlib.pyplot as plt
+%matplotlib inline
+
 #-------------------------------------
 # Combining Data
 #-------------------------------------
@@ -187,11 +192,17 @@ df_projects['closingyear'] = df_projects['closingdate'].dt.year
 df_projects['closingday'] = df_projects['closingdate'].dt.day
 df_projects['closingweekday'] = df_projects['closingdate'].dt.weekday
 
+def save_file(file_path):
+    if os.path.exists(file_path):
+        print("File already exists!")
+    else:
+        df_projects.to_csv(file_path, index=False)
+        print("File saved successfully!")
+
+save_file('../artifacts/transform/df_projects_parsing_dates.csv')
 #-------------------------------------
 # Encoding Data
 #-------------------------------------
-
-from encodings.aliases import aliases
 
 alias_values = set(aliases.values())
 
@@ -217,8 +228,6 @@ df_gdp = df_gdp.drop(['Unnamed: 62'], axis=1)
 df_gdp.isnull().sum()
 
 #Plot the missing values in the df_gdp data frame
-import matplotlib.pyplot as plt
-%matplotlib inline
 
 # put the data set into long form instead of wide
 df_melt = pd.melt(df_gdp, id_vars=['Country Name', 'Country Code', 'Indicator Name', 'Indicator Code'], var_name='year', value_name='GDP')
@@ -240,5 +249,67 @@ plot_results('GDP')
 #-------------------------------------
 # Dupplicate Data
 #-------------------------------------
+df_project = pd.read_csv('../artifacts/transform/df_projects_parsing_dates.csv', dtype=str)
+df_project['totalamt'] = pd.to_numeric(df_project['totalamt'].str.replace(',',""))
+df_project['countryname'] = df_project['countryname'].str.split(';', expand = True)[0]
+df_project['boardapprovaldate'] = pd.to_datetime(df_project['boardapprovaldate'])
+# filter the data frame for projects over 1 billion dollars
+
+# count the number of unique countries in the results
+df_project[df_project['totalamt'] > 1000000000]['countryname'].nunique()
+
+#-------------------------------------
+# Dummy Variables
+#-------------------------------------
+
+sector = df_project.copy()
+sector = sector[['project_name', 'lendinginstr', 'sector1', 'sector2', 'sector3', 'sector4', 'sector5', 'sector',
+          'mjsector1', 'mjsector2', 'mjsector3', 'mjsector4', 'mjsector5',
+          'mjsector', 'theme1', 'theme2', 'theme3', 'theme4', 'theme5', 'theme ',
+          'goal', 'financier', 'mjtheme1name', 'mjtheme2name', 'mjtheme3name',
+          'mjtheme4name', 'mjtheme5name']]
+
+# output percentage of values that are missing
+100 * sector.isnull().sum() / sector.shape[0]
+
+# Create a list of the unique values in sector1. Use the sort_values() and unique() pandas methods. 
+# And then convert those results into a Python list
+uniquesectors1 = sector['sector1'].sort_values().unique()
+uniquesectors1
+
+print('Number of unique sectors:', len(uniquesectors1))
+
+# TODO: In the sector1 variable, replace the string '!$10' with nan
+# HINT: you can use the pandas replace() method and numpy.nan
+sector['sector1'] = sector['sector1'].replace('!$!0', np.nan)
+
+# TODO: In the sector1 variable, remove the last 10 or 11 characters from the sector1 variable.
+# HINT: There is more than one way to do this including the replace method
+# HINT: You can use a regex expression '!.+'
+# That regex expression looks for a string with an exclamation
+# point followed by one or more characters
+
+sector['sector1'] = sector['sector1'].replace('!.+', '', regex=True)
+
+# TODO: Remove the string '(Historic)' from the sector1 variable
+# HINT: You can use the replace method
+sector['sector1'] = sector['sector1'].replace('^(\(Historic\))', '', regex=True)
+
+print('Number of unique sectors after cleaning:', len(list(sector['sector1'].unique())))
+print('Percentage of null values after cleaning:', 100 * sector['sector1'].isnull().sum() / sector['sector1'].shape[0])
+
+dummies = pd.DataFrame(pd.get_dummies(sector['sector1']))
+
+#  Filter the projects data for the totalamt, the year from boardapprovaldate, and the dummy variables
+df_projects['year'] = df_projects['boardapprovaldate'].dt.year
+df_dummy = df_projects[['totalamt','year']]
+df_final = pd.concat([df_dummy, dummies], axis=1)
+
+df_final.head()
+
+#-------------------------------------
+# Finding Outliers
+#-------------------------------------
+
 
 
